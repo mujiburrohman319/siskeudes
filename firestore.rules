@@ -1,0 +1,97 @@
+rules_version = '2';
+// Security Rules SISKEUDES-Web.
+// Menegakkan: isolasi kabupaten/desa, peran baca-saja, kunci periode (penutupan kas bulanan),
+// jurnal terposting tidak dapat diubah, jejak audit tidak dapat diubah.
+// Catatan: validasi jumlah (sisa pagu, saldo kas) dijalankan di src/lib/layanan.ts. Untuk produksi,
+// pindahkan fungsi layanan tersebut ke Cloud Functions callable (lihat CLAUDE.md, backlog).
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function me() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function role() { return me().role; }
+    function isSuper() { return signedIn() && role() == 'SUPERADMIN'; }
+    function inPemda(p) { return signedIn() && me().pemdaId == p && me().aktif != false; }
+    function isAdminKab(p) { return isSuper() || (inPemda(p) && role() in ['ADMIN_KAB', 'DOSEN']); }
+    function isKabReader(p) { return isSuper() || (inPemda(p) && role() in ['ADMIN_KAB', 'DOSEN', 'KECAMATAN', 'APIP']); }
+    function desaRoles() { return ['OPERATOR_DESA', 'KADES', 'SEKDES', 'KAUR_KEU', 'PKA', 'MAHASISWA']; }
+    function kecDesa(p, d) { return get(/databases/$(database)/documents/pemda/$(p)/desa/$(d)).data.kecId; }
+    function canReadDesa(p, d) {
+      return isSuper()
+        || (inPemda(p) && role() in ['ADMIN_KAB', 'DOSEN', 'APIP'])
+        || (inPemda(p) && role() == 'KECAMATAN' && kecDesa(p, d) == me().kecId)
+        || (inPemda(p) && me().desaId == d);
+    }
+    function canWriteDesa(p, d) { return isAdminKab(p) || (inPemda(p) && me().desaId == d && role() in desaRoles()); }
+    function tutupPath(p, d, ta, bln) { return /databases/$(database)/documents/pemda/$(p)/desa/$(d)/ta/$(ta)/penutupanKas/$(bln); }
+    function terbukaTgl(p, d, ta, tgl) { return !exists(tutupPath(p, d, ta, tgl.split('-')[1])); }
+    function terbukaBulan(p, d, ta, b) { return !exists(tutupPath(p, d, ta, '0' + string(b))) && !exists(tutupPath(p, d, ta, string(b))); }
+
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isKabReader(resource.data.pemdaId));
+      allow update: if isAdminKab(resource.data.pemdaId)
+        && request.resource.data.pemdaId == resource.data.pemdaId
+        && (request.resource.data.role != 'SUPERADMIN' || isSuper());
+      allow create, delete: if isSuper();
+    }
+
+    match /pemda/{p} {
+      allow read: if inPemda(p) || isSuper();
+      allow create: if isSuper();
+      allow update: if isAdminKab(p);
+
+      // Monitoring diringkas oleh desa saat posting/penutupan kas.
+      match /monitoring/{id} {
+        allow read: if isKabReader(p);
+        allow write: if canWriteDesa(p, request.resource.data.desaId);
+      }
+
+      // Referensi, wilayah, konfigurasi, pesan: dibaca semua user pemda, diubah admin kabupaten.
+      match /{col}/{id} {
+        allow read: if inPemda(p) || isSuper();
+        allow write: if isAdminKab(p) && col != 'monitoring';
+      }
+
+      match /desa/{d} {
+        // Data tingkat desa (perangkat, rekening bank, RPJM, profil)
+        match /{col}/{id} {
+          allow read: if canReadDesa(p, d);
+          allow write: if canWriteDesa(p, d) && col in ['perangkat', 'rekeningBank', 'rpjm', 'umum'];
+        }
+
+        match /ta/{ta} {
+          match /audit/{id} {
+            allow read: if canReadDesa(p, d);
+            allow create: if canWriteDesa(p, d);
+          }
+          match /penutupanKas/{bln} {
+            allow read: if canReadDesa(p, d);
+            allow create: if canWriteDesa(p, d) && request.resource.data.dikunciKab != true;
+            // Desa hanya bisa membuka (hapus) bila belum dikunci kabupaten; kunci hanya oleh admin.
+            allow delete: if (canWriteDesa(p, d) && resource.data.dikunciKab != true) || isAdminKab(p);
+            allow update: if isAdminKab(p);
+          }
+          match /ledger/{id} {
+            allow read: if canReadDesa(p, d);
+            allow create, update: if canWriteDesa(p, d) && terbukaBulan(p, d, ta, request.resource.data.bulan);
+            allow delete: if canWriteDesa(p, d) && terbukaBulan(p, d, ta, resource.data.bulan);
+          }
+          match /jurnal/{id} {
+            allow read: if canReadDesa(p, d);
+            allow create: if canWriteDesa(p, d) && terbukaTgl(p, d, ta, request.resource.data.tgl);
+            allow update: if canWriteDesa(p, d) && resource.data.posted != true && terbukaTgl(p, d, ta, request.resource.data.tgl);
+            allow delete: if canWriteDesa(p, d) && resource.data.posted != true;
+          }
+          match /{col}/{id} {
+            allow read: if canReadDesa(p, d);
+            allow create, update: if canWriteDesa(p, d)
+              && !(col in ['audit', 'penutupanKas', 'ledger', 'jurnal'])
+              && (!(col in ['penerimaan', 'setorPajak', 'mutasi', 'pengembalian']) || terbukaTgl(p, d, ta, request.resource.data.tgl));
+            allow delete: if canWriteDesa(p, d)
+              && !(col in ['audit', 'penutupanKas', 'ledger', 'jurnal'])
+              && (!(col in ['penerimaan', 'setorPajak', 'mutasi', 'pengembalian']) || terbukaTgl(p, d, ta, resource.data.tgl));
+          }
+        }
+      }
+    }
+  }
+}

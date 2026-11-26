@@ -1,21 +1,18 @@
-import {
-  ArrowRightOutlined, AuditOutlined, BankOutlined, CalendarOutlined, CheckCircleFilled, ClockCircleOutlined, DownloadOutlined,
-  FileTextOutlined, LockOutlined, PlusOutlined, RiseOutlined, ShoppingCartOutlined,
-} from '@ant-design/icons';
-import { Alert, Button, Card, Col, Descriptions, Form, Input, Progress, Row, Space, Table, Tag, Typography } from 'antd';
-import { useMemo, type ReactNode } from 'react';
+import { Alert, Button, Card, Col, Descriptions, Form, Input, Progress, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { Uang } from '../components/Input';
 import { useAksi, useApp } from '../context/App';
 import { P } from '../lib/paths';
 import { konfigurasiDefault, seedReferensi } from '../lib/seed';
 import { store } from '../lib/store';
-import { BULAN, rp, sum } from '../lib/format';
+import { BULAN, sum } from '../lib/format';
 import { saldoKas, saldoPajak, saldoPanjar, statusKegiatanWajib } from '../lib/keuangan';
 import { useAnggaran, useSaldoAwal, useTa } from '../lib/useTa';
 import type { Ledger, PenutupanKas, RincianAnggaran, Spp } from '../lib/types';
 
 function BerandaDesa() {
-  const { desa, konfig, ta, kegiatanMap, profile } = useApp();
+  const { desa, konfig, ta, kegiatanMap } = useApp();
   const { posting } = useAnggaran();
   const { data: ledger } = useTa<Ledger>('ledger');
   const { data: spp } = useTa<Spp>('spp');
@@ -34,92 +31,38 @@ function BerandaDesa() {
   const wajib = statusKegiatanWajib(rincian, konfig.kegiatanWajib);
   const antre = (s: Spp['status']) => spp.filter((x) => x.status === s).length;
 
-  const pct = (a: number, b?: number) => (b ? Math.min(100, Math.round((a / b) * 100)) : 0);
-  const totalPajak = sum(Object.values(pajak), (x) => x);
-  const jam = new Date().getHours();
-  const sapa = jam < 11 ? 'Selamat pagi' : jam < 15 ? 'Selamat siang' : jam < 19 ? 'Selamat sore' : 'Selamat malam';
-
-  const kpi: { label: string; nilai: number; ikon: ReactNode; warna: string; latar: string; bawah: ReactNode }[] = [
-    {
-      label: 'Anggaran Pendapatan', nilai: t?.pendapatan ?? 0, ikon: <RiseOutlined />, warna: '#0f7a4d', latar: '#e7f6ee',
-      bawah: <><Progress percent={pct(real.pendapatan, t?.pendapatan)} size="small" strokeColor="#0f7a4d" />Realisasi Rp {rp(real.pendapatan)}</>,
-    },
-    {
-      label: 'Anggaran Belanja', nilai: t?.belanja ?? 0, ikon: <ShoppingCartOutlined />, warna: '#2563eb', latar: '#e8effd',
-      bawah: <><Progress percent={pct(real.belanja, t?.belanja)} size="small" strokeColor="#2563eb" />Realisasi Rp {rp(real.belanja)}</>,
-    },
-    { label: 'Saldo Kas di Bank', nilai: kas.BANK, ikon: <BankOutlined />, warna: '#0891b2', latar: '#e3f5f9', bawah: <>Kas tunai <b>Rp {rp(kas.TUNAI)}</b></> },
-    { label: 'Pajak belum disetor', nilai: totalPajak, ikon: <AuditOutlined />, warna: '#d97706', latar: '#fdf3e3', bawah: <>Panjar belum di-SPJ-kan <b>Rp {rp(saldoPanjar(ledger))}</b></> },
-  ];
-
-  const alur = [
-    { label: 'Draft / verifikasi', n: antre('DRAFT'), warna: '#5d6b64' },
-    { label: 'Menunggu Kades', n: antre('DIVERIFIKASI'), warna: '#2563eb' },
-    { label: 'Siap dicairkan', n: antre('DISETUJUI'), warna: '#7c3aed' },
-    { label: 'Panjar belum SPJ', n: antre('DICAIRKAN'), warna: '#d97706' },
-  ];
-
   return (
     <>
-      <div className="sk-hero">
-        <div className="sk-hero-sapa">{sapa}, {profile?.nama?.split(' ')[0] ?? ''}</div>
-        <h2>Desa {desa?.nama}</h2>
-        <Space wrap size={[16, 8]} className="sk-hero-meta" style={{ display: 'flex' }}>
-          <span><CalendarOutlined /> Tahun Anggaran {ta}</span>
-          <span>{posting ? <><CheckCircleFilled style={{ color: '#6ee7b7' }} /> APBDes terposting</> : <><ClockCircleOutlined /> APBDes belum diposting</>}</span>
-          <span><LockOutlined /> Kas ditutup {bulanTutup ? `s.d. ${BULAN[bulanTutup - 1]}` : '— belum ada'}</span>
-        </Space>
-        <Space wrap style={{ marginTop: 20, position: 'relative', zIndex: 1 }}>
-          <Link to="/tu/spp"><Button type="primary" icon={<PlusOutlined />} style={{ background: '#fff', color: '#0a3d2a' }}>Buat SPP</Button></Link>
-          <Link to="/tu/penerimaan"><Button icon={<DownloadOutlined />}>Penerimaan</Button></Link>
-          <Link to="/laporan"><Button icon={<FileTextOutlined />}>Cetak Laporan</Button></Link>
-        </Space>
-      </div>
-
+      <Typography.Title level={4} style={{ margin: 0 }}>Desa {desa?.nama} — Tahun Anggaran {ta}</Typography.Title>
       {!posting && <Alert type="warning" showIcon message="APBDes belum diposting" description={<>Lengkapi <Link to="/anggaran/rincian">Isian Data Anggaran</Link> dan <Link to="/anggaran/rak">RAK</Link>, lalu lakukan <Link to="/anggaran/posting">Posting APBDes</Link>.</>} />}
-
-      <Row gutter={[20, 20]}>
-        {kpi.map((k) => (
-          <Col key={k.label} xs={24} sm={12} xl={6}>
-            <Card className="sk-kpi">
-              <div className="sk-kpi-atas">
-                <div>
-                  <div className="sk-kpi-label">{k.label}</div>
-                  <div className="sk-kpi-nilai"><small>Rp</small>{rp(k.nilai)}</div>
-                </div>
-                <span className="sk-kpi-ikon" style={{ color: k.warna, background: k.latar }}>{k.ikon}</span>
-              </div>
-              <div className="sk-kpi-bawah">{k.bawah}</div>
-            </Card>
-          </Col>
-        ))}
+      <Row gutter={[16, 16]}>
+        <Col xs={24} md={12} xl={6}><Card><Statistic title="Anggaran Pendapatan" value={t?.pendapatan ?? 0} formatter={(v) => <Uang v={Number(v)} />} />
+          <Progress percent={t?.pendapatan ? Math.round((real.pendapatan / t.pendapatan) * 100) : 0} size="small" /><Typography.Text type="secondary">Realisasi <Uang v={real.pendapatan} /></Typography.Text></Card></Col>
+        <Col xs={24} md={12} xl={6}><Card><Statistic title="Anggaran Belanja" value={t?.belanja ?? 0} formatter={(v) => <Uang v={Number(v)} />} />
+          <Progress percent={t?.belanja ? Math.round((real.belanja / t.belanja) * 100) : 0} size="small" /><Typography.Text type="secondary">Realisasi <Uang v={real.belanja} /></Typography.Text></Card></Col>
+        <Col xs={24} md={12} xl={6}><Card><Statistic title="Saldo Kas di Bank" value={kas.BANK} formatter={(v) => <Uang v={Number(v)} />} /><Typography.Text type="secondary">Kas tunai <Uang v={kas.TUNAI} /></Typography.Text></Card></Col>
+        <Col xs={24} md={12} xl={6}><Card><Statistic title="Pajak belum disetor" value={sum(Object.values(pajak), (x) => x)} formatter={(v) => <Uang v={Number(v)} />} /><Typography.Text type="secondary">Panjar belum di-SPJ-kan <Uang v={saldoPanjar(ledger)} /></Typography.Text></Card></Col>
       </Row>
-
-      <Row gutter={[20, 20]}>
+      <Row gutter={[16, 16]}>
         <Col xs={24} lg={12}>
-          <Card title="Alur SPP" extra={<Link to="/tu/spp">Lihat semua <ArrowRightOutlined /></Link>} style={{ height: '100%' }}>
-            <div className="sk-alur">
-              {alur.map((a) => (
-                <div key={a.label} className="sk-alur-item">
-                  <div className="sk-alur-angka" style={{ color: a.warna }}>{a.n}</div>
-                  <div className="sk-alur-label">{a.label}</div>
-                </div>
-              ))}
-            </div>
-            <Descriptions column={1} size="small" style={{ marginTop: 20 }}>
+          <Card title="Status">
+            <Descriptions column={1} size="small">
               <Descriptions.Item label="Posting terakhir">{posting ? <>{posting.jenis === 'AWAL' ? 'Awal Tahun' : posting.jenis === 'PERGESERAN' ? 'Pergeseran' : 'Perubahan'} (No. {posting.no}) — {posting.dasarHukum}</> : '-'}</Descriptions.Item>
               <Descriptions.Item label="Penutupan kas">{bulanTutup ? `sampai ${BULAN[bulanTutup - 1]}` : 'belum ada'}</Descriptions.Item>
-              <Descriptions.Item label="Kontrol RAK">{konfig.kontrolRAK ? <Tag color="green">Aktif</Tag> : <Tag>Tidak aktif</Tag>}</Descriptions.Item>
+              <Descriptions.Item label="SPP menunggu">
+                <Space wrap size={4}><Tag>{antre('DRAFT')} draft / verifikasi</Tag><Tag color="blue">{antre('DIVERIFIKASI')} persetujuan Kades</Tag><Tag color="geekblue">{antre('DISETUJUI')} pencairan</Tag><Tag color="orange">{antre('DICAIRKAN')} panjar belum SPJ</Tag></Space>
+              </Descriptions.Item>
+              <Descriptions.Item label="Kontrol RAK">{konfig.kontrolRAK ? 'Aktif' : 'Tidak aktif'}</Descriptions.Item>
             </Descriptions>
           </Card>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="Kegiatan wajib" extra={<Typography.Text type="secondary" style={{ fontSize: 12 }}>dicek sebelum posting</Typography.Text>} style={{ height: '100%' }}>
+          <Card title="Kegiatan wajib (dicek sebelum posting)">
             <Table size="small" pagination={false} rowKey="kdKeg" dataSource={wajib}
               columns={[
                 { title: 'Kode', dataIndex: 'kdKeg', width: 90 },
                 { title: 'Kegiatan', dataIndex: 'kdKeg', render: (k: string) => kegiatanMap.get(k) },
-                { title: 'Status', dataIndex: 'sudah', render: (v: boolean) => (v ? <Tag icon={<CheckCircleFilled />} color="success">Sudah</Tag> : <Tag icon={<ClockCircleOutlined />} color="error">Belum</Tag>) },
+                { title: 'Status', dataIndex: 'sudah', render: (v: boolean) => <Tag color={v ? 'green' : 'red'}>{v ? 'Sudah' : 'Belum'}</Tag> },
               ]} />
           </Card>
         </Col>

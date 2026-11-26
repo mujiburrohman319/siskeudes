@@ -10,7 +10,6 @@ React 18 + TypeScript (strict) + Vite 5 + Ant Design 5 + Firebase 11 (Auth, Fire
 - `npm test` — business-logic + report tests (must stay green)
 - `npm run typecheck` / `npm run build`
 - `cd functions && npm run build` — Cloud Functions
-- `npm start` — serve `dist/` on `$PORT` (Firebase App Hosting entrypoint, `server.mjs`; config in `apphosting.yaml`)
 
 ## Architecture (read these first)
 - `src/lib/store/` — **DataStore abstraction**. `local.ts` (localStorage, used for simulation/classroom and tests) and `firebase.ts` (Firestore). `index.ts` picks Firebase when `VITE_FIREBASE_PROJECT_ID` is set. All app code goes through this interface (`list/get/set/remove/write(batch)/subscribe/nextNumber/auth`). Don't call Firestore SDK directly from pages.

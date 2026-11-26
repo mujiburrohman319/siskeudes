@@ -7,8 +7,6 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppProvider, useApp } from './context/App';
 import { Layout } from './Layout';
-import './styles.css';
-import { tema } from './theme';
 import { store } from './lib/store';
 import Beranda from './pages/Beranda';
 import DataUmum from './pages/DataUmum';
@@ -83,7 +81,7 @@ function Shell() {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ConfigProvider locale={idID} theme={tema}>
+    <ConfigProvider locale={idID} theme={{ token: { colorPrimary: '#1f6f43', borderRadius: 6 } }}>
       <BrowserRouter>
         <AppProvider>
           <Shell />

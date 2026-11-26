@@ -131,6 +131,7 @@ function normNama(s?: string): string {
   return (s ?? '')
     .toLowerCase()
     .replace(/\((contoh|simulasi)\)/gi, '')
+    .replace(/\bkab\.?\s+/g, 'kabupaten ')
     .replace(/\b(daerah khusus ibukota|dki)\b/g, 'jakarta')
     .replace(/\b(daerah istimewa|di)\b/g, '')
     .replace(/[^a-z0-9]+/g, ' ')

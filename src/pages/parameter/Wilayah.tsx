@@ -131,7 +131,7 @@ export default function Wilayah() {
 
   const bukaKec = (row: Kecamatan | null) => {
     setEditKec(row);
-    setManualKec(!!row || !kabId);
+    setManualKec(false);
     fKec.resetFields();
     if (row) fKec.setFieldsValue(row);
     setOpenKec(true);
@@ -167,7 +167,7 @@ export default function Wilayah() {
 
   const bukaDesa = (row: Desa | null) => {
     setEditDesa(row);
-    setManualDesa(!!row);
+    setManualDesa(false);
     fDesa.resetFields();
     if (row) fDesa.setFieldsValue(row);
     else if (kecamatan.length === 1) fDesa.setFieldsValue({ kecId: kecamatan[0]!.id });
@@ -329,30 +329,63 @@ export default function Wilayah() {
 
       <Modal open={openKec} title={`${editKec ? 'Ubah' : 'Tambah'} Kecamatan`} onCancel={() => setOpenKec(false)} onOk={simpanKec} okText="Simpan" cancelText="Batal" destroyOnClose>
         <Form form={fKec} layout="vertical" preserve={false}>
-          {!editKec && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                {manualKec ? 'Mode input manual' : 'Pilih dari daftar kecamatan Kemendagri'}
-              </Typography.Text>
-              <Space size={6}>
-                <span style={{ fontSize: 12, color: '#7b8a83' }}>Manual</span>
-                <Switch size="small" checked={manualKec} onChange={setManualKec} />
-              </Space>
-            </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              {manualKec ? 'Mode input manual' : 'Pilih dari daftar kecamatan Kemendagri'}
+            </Typography.Text>
+            <Space size={6}>
+              <span style={{ fontSize: 12, color: '#7b8a83' }}>Manual</span>
+              <Switch size="small" checked={manualKec} onChange={setManualKec} />
+            </Space>
+          </div>
+          {!manualKec && !kabId && (
+            <Row gutter={12} style={{ marginBottom: 4 }}>
+              <Col xs={24} sm={11}>
+                <Form.Item label="Provinsi">
+                  <Select
+                    showSearch
+                    allowClear
+                    optionFilterProp="label"
+                    placeholder="Pilih provinsi"
+                    value={provId}
+                    options={provList.map((p) => ({ value: p.id, label: `${p.kode} — ${p.nama}` }))}
+                    onChange={(v) => { setProvId(v); setKabId(undefined); }}
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={13}>
+                <Form.Item label="Kabupaten / Kota">
+                  <Select
+                    showSearch
+                    allowClear
+                    loading={loadingKab}
+                    disabled={!provId}
+                    optionFilterProp="label"
+                    placeholder={provId ? 'Pilih kabupaten/kota' : 'Pilih provinsi dahulu'}
+                    value={kabId}
+                    options={kabList.map((k) => ({ value: k.id, label: `${k.kode} — ${k.nama}` }))}
+                    onChange={(v) => setKabId(v)}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
           )}
-          {!editKec && !manualKec && (
+          {!manualKec && (
             <Form.Item label="Pilih Kecamatan (Kemendagri)">
               <Select
                 showSearch
                 loading={loadingKecRef}
                 disabled={!kabId}
                 optionFilterProp="label"
-                placeholder={kabId ? 'Cari nama atau kode kecamatan' : 'Pilih Kabupaten/Kota di bagian atas terlebih dahulu'}
-                options={kecRef.map((k) => ({
-                  value: k.id,
-                  label: `${k.kode} — ${k.nama}${kodeKecSudah.has(k.id) ? ' (sudah ada)' : ''}`,
-                  disabled: kodeKecSudah.has(k.id),
-                }))}
+                placeholder={kabId ? 'Cari nama atau kode kecamatan' : 'Pilih Provinsi dan Kabupaten/Kota terlebih dahulu'}
+                options={kecRef.map((k) => {
+                  const sudah = kodeKecSudah.has(k.id) && digitKodeWilayah(editKec?.kode) !== k.id;
+                  return {
+                    value: k.id,
+                    label: `${k.kode} — ${k.nama}${sudah ? ' (sudah ada)' : ''}`,
+                    disabled: sudah,
+                  };
+                })}
                 onChange={(id) => {
                   const pilih = kecRef.find((k) => k.id === id);
                   if (pilih) fKec.setFieldsValue({ kode: pilih.kode, nama: pilih.nama });
@@ -363,12 +396,12 @@ export default function Wilayah() {
           <Row gutter={12}>
             <Col xs={24} sm={10}>
               <Form.Item name="kode" label="Kode Kemendagri" rules={[{ required: true, message: 'Kode wajib diisi' }]}>
-                <Input placeholder="61.01.01" readOnly={!editKec && !manualKec} />
+                <Input placeholder="61.01.01" readOnly={!manualKec} />
               </Form.Item>
             </Col>
             <Col xs={24} sm={14}>
               <Form.Item name="nama" label="Nama Kecamatan" rules={[{ required: true, message: 'Nama kecamatan wajib diisi' }]}>
-                <Input placeholder="Sambas" readOnly={!editKec && !manualKec} />
+                <Input placeholder="Sambas" readOnly={!manualKec} />
               </Form.Item>
             </Col>
           </Row>
@@ -377,17 +410,15 @@ export default function Wilayah() {
 
       <Modal open={openDesa} title={`${editDesa ? 'Ubah' : 'Tambah'} Desa`} onCancel={() => setOpenDesa(false)} onOk={simpanDesa} okText="Simpan" cancelText="Batal" destroyOnClose>
         <Form form={fDesa} layout="vertical" preserve={false}>
-          {!editDesa && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                {manualDesa ? 'Mode input manual' : 'Pilih dari daftar desa Kemendagri'}
-              </Typography.Text>
-              <Space size={6}>
-                <span style={{ fontSize: 12, color: '#7b8a83' }}>Manual</span>
-                <Switch size="small" checked={manualDesa} onChange={setManualDesa} />
-              </Space>
-            </div>
-          )}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              {manualDesa ? 'Mode input manual' : 'Pilih dari daftar desa Kemendagri'}
+            </Typography.Text>
+            <Space size={6}>
+              <span style={{ fontSize: 12, color: '#7b8a83' }}>Manual</span>
+              <Switch size="small" checked={manualDesa} onChange={setManualDesa} />
+            </Space>
+          </div>
           <Form.Item name="kecId" label="Kecamatan" rules={[{ required: true, message: 'Pilih kecamatan' }]}>
             <Select
               showSearch
@@ -399,12 +430,12 @@ export default function Wilayah() {
               }}
             />
           </Form.Item>
-          {!editDesa && !manualDesa && (
+          {!manualDesa && (
             <Form.Item
               label={
                 <span style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
                   <span>Pilih Desa (Kemendagri)</span>
-                  {kecIdDipilih && desaRef.length > 0 && (
+                  {!editDesa && kecIdDipilih && desaRef.length > 0 && (
                     <Popconfirm
                       title={`Muat ${desaRef.filter((d) => !kodeDesaSudah.has(d.id)).length} desa/kelurahan di kecamatan ini?`}
                       okText="Muat Semua"
@@ -427,10 +458,11 @@ export default function Wilayah() {
                 options={desaRef.map((d) => {
                   const seg4 = digitKodeWilayah(d.id).slice(6, 7);
                   const jenis = seg4 === '1' ? 'Kel.' : 'Desa';
+                  const sudah = kodeDesaSudah.has(d.id) && digitKodeWilayah(editDesa?.kode) !== d.id;
                   return {
                     value: d.id,
-                    label: `${d.kode} — ${d.nama} (${jenis})${kodeDesaSudah.has(d.id) ? ' ✓' : ''}`,
-                    disabled: kodeDesaSudah.has(d.id),
+                    label: `${d.kode} — ${d.nama} (${jenis})${sudah ? ' ✓' : ''}`,
+                    disabled: sudah,
                   };
                 })}
                 onChange={(id) => {
@@ -444,15 +476,15 @@ export default function Wilayah() {
             <Col xs={24} sm={11}>
               <Form.Item
                 name="kode"
-                label={<span>Kode Desa Kemendagri {!editDesa && !manualDesa && <Tag color="green" style={{ marginLeft: 4 }}>Otomatis</Tag>}</span>}
+                label={<span>Kode Desa Kemendagri {!manualDesa && <Tag color="green" style={{ marginLeft: 4 }}>Otomatis</Tag>}</span>}
                 rules={[{ required: true, message: 'Kode desa wajib diisi' }]}
               >
-                <Input placeholder="61.01.01.2001" readOnly={!editDesa && !manualDesa} />
+                <Input placeholder="61.01.01.2001" readOnly={!manualDesa} />
               </Form.Item>
             </Col>
             <Col xs={24} sm={13}>
               <Form.Item name="nama" label="Nama Desa" rules={[{ required: true, message: 'Nama desa wajib diisi' }]}>
-                <Input placeholder="Pasar Melayu" readOnly={!editDesa && !manualDesa} />
+                <Input placeholder="Pasar Melayu" readOnly={!manualDesa} />
               </Form.Item>
             </Col>
           </Row>

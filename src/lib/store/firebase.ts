@@ -1,5 +1,5 @@
 // Adapter Firebase (Auth + Firestore + Functions).
-import { initializeApp } from 'firebase/app';
+import { deleteApp, getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import {
   connectAuthEmulator, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, sendPasswordResetEmail,
   signInWithEmailAndPassword, signOut,
@@ -14,14 +14,15 @@ import { clean } from './types';
 
 export function createFirebaseStore(): DataStore {
   const env = import.meta.env;
-  const app = initializeApp({
+  const firebaseConfig = {
     apiKey: env.VITE_FIREBASE_API_KEY,
     authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
     projectId: env.VITE_FIREBASE_PROJECT_ID,
     storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET,
     messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID,
     appId: env.VITE_FIREBASE_APP_ID,
-  });
+  };
+  const app = initializeApp(firebaseConfig);
   // Persistensi offline: entri tetap bisa dilakukan saat sinyal lemah.
   // Database bernama (mis. "siskeudes") bila bukan "(default)".
   const databaseId = env.VITE_FIREBASE_DATABASE_ID?.trim() || '(default)';
@@ -30,13 +31,51 @@ export function createFirebaseStore(): DataStore {
   }, databaseId);
   const fbAuth = getAuth(app);
   const fns = getFunctions(app, 'asia-southeast2');
-  if (env.VITE_USE_EMULATOR === 'true') {
+  const useEmulator = env.VITE_USE_EMULATOR === 'true';
+  if (useEmulator) {
     connectFirestoreEmulator(db, 'localhost', 8080);
     connectAuthEmulator(fbAuth, 'http://localhost:9099');
     connectFunctionsEmulator(fns, 'localhost', 5001);
   }
 
   const withId = (id: string, d: Record<string, unknown>) => ({ ...d, id });
+
+  async function createUsersClientSide(items: NewUserInput[]): Promise<string[]> {
+    const appName = '__siskeudes_create_user__';
+    const existing = getApps().find((a) => a.name === appName);
+    const secApp: FirebaseApp = existing ?? initializeApp(firebaseConfig, appName);
+    const secAuth = getAuth(secApp);
+    if (useEmulator && !existing) {
+      connectAuthEmulator(secAuth, 'http://localhost:9099');
+    }
+    const uids: string[] = [];
+    const gagal: string[] = [];
+    try {
+      for (const it of items) {
+        const email = it.email.trim().toLowerCase();
+        try {
+          const cred = await createUserWithEmailAndPassword(secAuth, email, it.password);
+          const uid = cred.user.uid;
+          const profileData = clean({
+            ...it.profile,
+            uid,
+            email,
+            aktif: it.profile.aktif ?? true,
+          } as Record<string, unknown>);
+          await setDoc(doc(db, `users/${uid}`), profileData);
+          uids.push(uid);
+        } catch (e) {
+          gagal.push(`${email}: ${e instanceof Error ? e.message.replace('Firebase: ', '') : String(e)}`);
+        } finally {
+          await signOut(secAuth).catch(() => undefined);
+        }
+      }
+    } finally {
+      await deleteApp(secApp).catch(() => undefined);
+    }
+    if (gagal.length && !uids.length) throw new Error(gagal.join('\n'));
+    return uids;
+  }
 
   return {
     kind: 'firebase',
@@ -105,9 +144,19 @@ export function createFirebaseStore(): DataStore {
         await signOut(fbAuth);
       },
       async createUsers(items: NewUserInput[]) {
-        const call = httpsCallable<{ items: NewUserInput[] }, { uids: string[] }>(fns, 'buatUser');
-        const res = await call({ items });
-        return res.data.uids;
+        try {
+          const call = httpsCallable<{ items: NewUserInput[] }, { uids: string[] }>(fns, 'buatUser');
+          const res = await call({ items });
+          return res.data.uids;
+        } catch (err) {
+          const code = (err as { code?: string })?.code ?? '';
+          const msg = err instanceof Error ? err.message : '';
+          const fallbackCodes = ['functions/internal', 'functions/unavailable', 'functions/not-found', 'functions/unimplemented'];
+          if (fallbackCodes.includes(code) || msg === 'internal' || msg.includes('CORS') || msg.includes('Failed to fetch')) {
+            return createUsersClientSide(items);
+          }
+          throw err;
+        }
       },
       async resetPassword(email) {
         await sendPasswordResetEmail(fbAuth, email);

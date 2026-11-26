@@ -29,10 +29,12 @@ service cloud.firestore {
 
     match /users/{uid} {
       allow read: if signedIn() && (request.auth.uid == uid || isKabReader(resource.data.pemdaId));
+      allow create: if isSuper()
+        || (isAdminKab(request.resource.data.pemdaId) && request.resource.data.role != 'SUPERADMIN');
       allow update: if isAdminKab(resource.data.pemdaId)
         && request.resource.data.pemdaId == resource.data.pemdaId
         && (request.resource.data.role != 'SUPERADMIN' || isSuper());
-      allow create, delete: if isSuper();
+      allow delete: if isSuper();
     }
 
     // Pendaftaran organisasi mandiri: pendaftar membuat/mengajukan ulang miliknya, Super Admin memproses.

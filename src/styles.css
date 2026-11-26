@@ -1,0 +1,191 @@
+/* Gaya global SISKEUDES-Web (melengkapi token tema Ant Design di src/theme.ts). */
+html, body, #root { min-height: 100%; }
+body {
+  margin: 0;
+  background: #f4f7f5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'tnum' 1; /* angka rata lebar: kolom rupiah rapi */
+}
+
+/* ---------- Kartu ---------- */
+.ant-card:not(.ant-card-type-inner) {
+  border: 1px solid #e9eeeb;
+  box-shadow: 0 1px 2px rgba(16, 24, 20, 0.04), 0 4px 16px -8px rgba(16, 24, 20, 0.08);
+}
+.ant-card .ant-card-head { border-bottom-color: #eef2ef; }
+.ant-card .ant-card-head-title { font-weight: 650; letter-spacing: -0.01em; }
+
+/* ---------- Tabel ---------- */
+.ant-table-wrapper .ant-table-thead > tr > th {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.ant-table-wrapper .ant-table { border-radius: 10px; }
+
+/* ---------- Kerangka (Layout) ---------- */
+.sk-sider {
+  position: sticky !important;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(180deg, #0b3326 0%, #0e4733 100%) !important;
+  box-shadow: 1px 0 0 rgba(0, 0, 0, 0.04);
+  z-index: 20;
+}
+.sk-sider .ant-layout-sider-children { display: flex; flex-direction: column; }
+.sk-sider-menu { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 8px 0 16px; }
+.sk-sider-menu::-webkit-scrollbar { width: 6px; }
+.sk-sider-menu::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 3px; }
+.sk-sider .ant-menu-dark .ant-menu-item-selected { font-weight: 600; }
+.sk-sider .ant-menu-dark .ant-menu-item-selected::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 10px; bottom: 10px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: #34d399;
+}
+
+.sk-brand {
+  display: flex; align-items: center; gap: 12px;
+  height: 64px; padding: 0 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  color: #fff; flex-shrink: 0;
+}
+.sk-brand-logo {
+  width: 36px; height: 36px; flex-shrink: 0;
+  display: grid; place-items: center;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #34d399, #059669);
+  color: #fff; font-weight: 800; font-size: 14px;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.45);
+}
+.sk-brand-teks { min-width: 0; line-height: 1.2; }
+.sk-brand-nama { font-weight: 750; font-size: 15px; letter-spacing: -0.01em; color: #fff; }
+.sk-brand-sub { font-size: 12px; color: rgba(236, 253, 245, 0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.sk-header {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; gap: 12px;
+  backdrop-filter: saturate(180%) blur(10px);
+  -webkit-backdrop-filter: saturate(180%) blur(10px);
+  border-bottom: 1px solid #e6ebe8;
+  line-height: 1.4;
+}
+.sk-judul { min-width: 0; line-height: 1.25; }
+.sk-judul-grup { font-size: 12px; color: #7b8a83; }
+.sk-judul-hal { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.sk-desa-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 12px; border-radius: 999px;
+  background: #ecf7f1; color: #0a5c3a; font-weight: 600; font-size: 13px;
+  white-space: nowrap;
+}
+.sk-user {
+  display: flex; align-items: center; gap: 10px;
+  padding: 4px 8px 4px 4px; border-radius: 999px;
+  cursor: pointer; transition: background 0.15s;
+}
+.sk-user:hover { background: #eef3f0; }
+.sk-user-nama { font-weight: 600; font-size: 13px; line-height: 1.2; max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sk-user-peran { font-size: 12px; color: #7b8a83; line-height: 1.2; }
+
+.sk-tumpuk { display: flex; flex-direction: column; gap: 20px; }
+.sk-tumpuk > * { margin: 0; }
+.sk-konten { padding: 24px; width: 100%; max-width: 1600px; margin: 0 auto; }
+
+/* ---------- Beranda ---------- */
+.sk-hero {
+  position: relative; overflow: hidden;
+  border-radius: 18px; padding: 28px 28px;
+  color: #fff;
+  background:
+    radial-gradient(1200px 300px at 100% 0%, rgba(52, 211, 153, 0.35), transparent 60%),
+    linear-gradient(135deg, #0a3d2a 0%, #0f7a4d 100%);
+  box-shadow: 0 12px 32px -16px rgba(10, 61, 42, 0.6);
+}
+.sk-hero::after {
+  content: ''; position: absolute; right: -60px; bottom: -80px;
+  width: 260px; height: 260px; border-radius: 50%;
+  border: 40px solid rgba(255, 255, 255, 0.06);
+}
+.sk-hero h2 { color: #fff; margin: 4px 0 6px; font-size: 26px; font-weight: 750; letter-spacing: -0.02em; }
+.sk-hero-sapa { color: rgba(236, 253, 245, 0.8); font-size: 14px; }
+.sk-hero-meta { color: rgba(236, 253, 245, 0.85); }
+.sk-hero .ant-btn-default { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.25); color: #fff; }
+.sk-hero .ant-btn-default:not(:disabled):hover { background: rgba(255, 255, 255, 0.2) !important; border-color: rgba(255, 255, 255, 0.4) !important; color: #fff !important; }
+
+.sk-kpi { height: 100%; }
+.sk-kpi .ant-card-body { display: flex; flex-direction: column; gap: 10px; height: 100%; }
+.sk-kpi-atas { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.sk-kpi-label { color: #5d6b64; font-size: 13px; font-weight: 500; }
+.sk-kpi-nilai { font-size: 24px; font-weight: 750; letter-spacing: -0.02em; line-height: 1.2; margin-top: 4px; }
+.sk-kpi-nilai small { font-size: 13px; font-weight: 600; color: #7b8a83; margin-right: 4px; }
+.sk-kpi-ikon {
+  width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+  display: grid; place-items: center; font-size: 20px;
+}
+.sk-kpi-bawah { color: #5d6b64; font-size: 13px; margin-top: auto; }
+
+.sk-alur { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.sk-alur-item { border-radius: 12px; padding: 14px; background: #f7faf8; border: 1px solid #eef2ef; }
+.sk-alur-angka { font-size: 26px; font-weight: 750; line-height: 1.1; }
+.sk-alur-label { font-size: 12px; color: #5d6b64; margin-top: 4px; }
+@media (max-width: 575px) { .sk-alur { grid-template-columns: repeat(2, 1fr); } }
+
+/* ---------- Login ---------- */
+.sk-login { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); background: #fff; }
+.sk-login-kiri {
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 48px 56px; color: #fff;
+  background:
+    radial-gradient(900px 500px at 0% 100%, rgba(52, 211, 153, 0.28), transparent 60%),
+    radial-gradient(700px 400px at 100% 0%, rgba(16, 185, 129, 0.25), transparent 60%),
+    linear-gradient(160deg, #072a1d 0%, #0b3d2b 55%, #0f6a44 100%);
+}
+.sk-login-kiri::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: linear-gradient(180deg, transparent, #000 30%, #000 70%, transparent);
+}
+.sk-login-kiri > * { position: relative; }
+.sk-login-kiri h1 { color: #fff; font-size: 40px; line-height: 1.15; font-weight: 800; letter-spacing: -0.03em; margin: 0 0 16px; }
+.sk-login-kiri p { color: rgba(236, 253, 245, 0.78); font-size: 16px; line-height: 1.6; margin: 0; max-width: 480px; }
+.sk-fitur { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 36px; max-width: 520px; }
+.sk-fitur-item { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); }
+.sk-fitur-item .anticon { font-size: 18px; color: #6ee7b7; margin-top: 2px; }
+.sk-fitur-item b { display: block; font-size: 14px; }
+.sk-fitur-item span { font-size: 12.5px; color: rgba(236, 253, 245, 0.65); }
+.sk-login-kanan { display: flex; align-items: center; justify-content: center; padding: 40px 24px; background: #fbfcfb; }
+.sk-login-form { width: 100%; max-width: 440px; }
+.sk-login-form h2 { font-size: 26px; font-weight: 750; letter-spacing: -0.02em; margin: 0 0 6px; }
+.sk-demo { display: grid; gap: 8px; max-height: 300px; overflow: auto; padding-right: 2px; }
+.sk-demo-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: 12px;
+  border: 1px solid #e6ebe8; background: #fff;
+  cursor: pointer; text-align: left; font: inherit; color: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+.sk-demo-item:hover { border-color: #34d399; box-shadow: 0 4px 14px -6px rgba(15, 122, 77, 0.3); transform: translateY(-1px); }
+.sk-demo-item.aktif { border-color: #0f7a4d; background: #f0faf5; }
+.sk-demo-peran { font-weight: 600; font-size: 13px; }
+.sk-demo-email { font-size: 12px; color: #7b8a83; }
+
+@media (max-width: 991px) {
+  .sk-login { grid-template-columns: 1fr; }
+  .sk-login-kiri { padding: 32px 24px; }
+  .sk-login-kiri h1 { font-size: 28px; }
+  .sk-fitur { display: none; }
+  .sk-tumpuk { display: flex; flex-direction: column; gap: 20px; }
+.sk-tumpuk > * { margin: 0; }
+.sk-konten { padding: 16px; }
+  .sk-header { padding: 0 12px !important; }
+}
+@media (max-width: 575px) { .sk-judul-grup { display: none; } }

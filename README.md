@@ -42,6 +42,7 @@ Isi data contoh: **Tools › Backup & Data Simulasi › Isi contoh lengkap** (AP
    Login → aplikasi menampilkan form **Penyiapan Pemda** (membuat dokumen pemda + referensi rekening/kegiatan/sumber dana).
 6. Lanjutkan di aplikasi: Parameter › Data Wilayah (kecamatan & desa) → File › Pengaturan UserID (Tambah User / Create All User).
 7. Hosting: `npm run build && firebase deploy --only hosting`.
+   Alternatif **Firebase App Hosting** (deploy otomatis dari GitHub): buildpack menjalankan `npm run build` lalu `npm start` (`server.mjs`, menyajikan `dist/` di `$PORT`). Atur variabel `VITE_FIREBASE_*` di `apphosting.yaml` (availability `BUILD`); tanpa itu aplikasi berjalan dalam mode lokal.
 
 Emulator lokal: `firebase emulators:start` lalu set `VITE_USE_EMULATOR=true` di `.env`.
 

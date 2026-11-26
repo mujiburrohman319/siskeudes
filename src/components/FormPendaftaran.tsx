@@ -102,7 +102,7 @@ export function FieldsPendaftaran() {
             options={kabTersaring.map((k) => ({ value: k.nama, label: `${k.kode} — ${k.nama}` }))}
             onChange={(val) => {
               const dipilih = kabTersaring.find((k) => k.nama === val);
-              form.setFieldValue('kodeWilayah', dipilih?.kode);
+              form.setFieldsValue({ kodeWilayah: dipilih?.kode });
             }}
           />
         ) : (

@@ -165,7 +165,7 @@ export default function OrganisasiPage() {
           if (ok) setBaru(false);
         }}>
         <Form form={fBaru} layout="vertical" requiredMark={false} initialValues={{ jenis: 'KABUPATEN' }}
-          onValuesChange={(c, all) => { if ('nama' in c || 'jenis' in c) fBaru.setFieldValue('pemdaId', usulKodePemda(all.nama ?? '', all.jenis)); }}>
+          onValuesChange={(c, all) => { if ('nama' in c || 'jenis' in c) fBaru.setFieldsValue({ pemdaId: usulKodePemda(all.nama ?? '', all.jenis) }); }}>
           <Form.Item name="kodeWilayah" hidden><Input /></Form.Item>
           <Row gutter={12}>
             <Col xs={24} sm={10}>

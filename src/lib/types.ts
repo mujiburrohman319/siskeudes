@@ -60,6 +60,7 @@ export interface Pendaftaran {
   email: string;
   jenis: JenisInstansi;
   namaInstansi: string; // "Kabupaten Sambas"
+  kodeWilayah?: string; // kode Kemendagri, mis. "61.01"
   provinsi: string;
   namaPj: string; // penanggung jawab
   jabatan: string;
@@ -76,6 +77,7 @@ export interface Pendaftaran {
 export interface Pemda {
   id: string;
   nama: string; // "Kabupaten Sambas"
+  kodeWilayah?: string; // kode Kemendagri, mis. "61.01"
   provinsi?: string;
   ibukota?: string;
   simulasi?: boolean;

@@ -6,11 +6,12 @@ import { konfigurasiDefault, seedReferensi } from './seed';
 import type { AuthUser, DataStore } from './store/types';
 import type { JenisInstansi, Pendaftaran } from './types';
 
-export type DataPendaftaran = Pick<Pendaftaran, 'jenis' | 'namaInstansi' | 'provinsi' | 'namaPj' | 'jabatan' | 'hp' | 'catatan'>;
+export type DataPendaftaran = Pick<Pendaftaran, 'jenis' | 'namaInstansi' | 'kodeWilayah' | 'provinsi' | 'namaPj' | 'jabatan' | 'hp' | 'catatan'>;
 
 export interface DataOrganisasi {
   pemdaId: string;
   nama: string;
+  kodeWilayah?: string;
   provinsi: string;
   jenis?: JenisInstansi;
 }
@@ -47,6 +48,7 @@ export async function ajukanPendaftaran(store: DataStore, user: AuthUser, d: Dat
     email: user.email.toLowerCase(),
     jenis: d.jenis,
     namaInstansi: d.namaInstansi.trim(),
+    kodeWilayah: d.kodeWilayah?.trim() || undefined,
     provinsi: d.provinsi.trim(),
     namaPj: d.namaPj.trim(),
     jabatan: d.jabatan.trim(),
@@ -65,7 +67,7 @@ export async function siapkanPemda(store: DataStore, o: DataOrganisasi, ta: numb
   if (!KODE_VALID.test(o.pemdaId)) throw new Error('Kode organisasi hanya boleh huruf kecil, angka, dan tanda hubung (3–40 karakter).');
   if (await store.get(P.pemda(o.pemdaId))) throw new Error(`Kode organisasi "${o.pemdaId}" sudah dipakai. Gunakan kode lain.`);
   await store.write([
-    { type: 'set', path: P.pemda(o.pemdaId), data: { nama: o.nama.trim(), provinsi: o.provinsi.trim(), jenis: o.jenis ?? 'KABUPATEN', dibuat: sekarangISO() } },
+    { type: 'set', path: P.pemda(o.pemdaId), data: { nama: o.nama.trim(), kodeWilayah: o.kodeWilayah?.trim() || undefined, provinsi: o.provinsi.trim(), jenis: o.jenis ?? 'KABUPATEN', dibuat: sekarangISO() } },
     { type: 'set', path: P.konfigurasi(o.pemdaId, ta), data: konfigurasiDefault() },
   ]);
   await seedReferensi(store, o.pemdaId);
@@ -74,7 +76,7 @@ export async function siapkanPemda(store: DataStore, o: DataOrganisasi, ta: numb
 /** Super Admin menyetujui pendaftaran: buat organisasi, jadikan pendaftar Admin Kabupaten. */
 export async function setujuiPendaftaran(store: DataStore, p: Pendaftaran, o: DataOrganisasi, oleh: string, ta: number) {
   if (p.status !== 'MENUNGGU') throw new Error('Hanya pendaftaran berstatus menunggu yang dapat disetujui.');
-  await siapkanPemda(store, { ...o, jenis: o.jenis ?? p.jenis }, ta);
+  await siapkanPemda(store, { ...o, kodeWilayah: o.kodeWilayah ?? p.kodeWilayah, jenis: o.jenis ?? p.jenis }, ta);
   await store.write([
     {
       type: 'set', path: P.user(p.uid),

@@ -1,7 +1,7 @@
 // Adapter Firebase (Auth + Firestore + Functions).
 import { initializeApp } from 'firebase/app';
 import {
-  connectAuthEmulator, getAuth, onAuthStateChanged, sendPasswordResetEmail,
+  connectAuthEmulator, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, sendPasswordResetEmail,
   signInWithEmailAndPassword, signOut,
 } from 'firebase/auth';
 import {
@@ -94,6 +94,10 @@ export function createFirebaseStore(): DataStore {
       },
       async signIn(email, password) {
         await signInWithEmailAndPassword(fbAuth, email, password);
+      },
+      async signUp(email, password) {
+        const c = await createUserWithEmailAndPassword(fbAuth, email, password);
+        return { uid: c.user.uid, email: c.user.email ?? email };
       },
       async signOut() {
         await signOut(fbAuth);

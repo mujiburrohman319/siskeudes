@@ -45,12 +45,41 @@ export interface UserProfile {
   aktif?: boolean;
 }
 
+/** Pendaftaran organisasi (pemda/lembaga) mandiri dari halaman login; disetujui Super Admin. */
+export type StatusPendaftaran = 'MENUNGGU' | 'DISETUJUI' | 'DITOLAK';
+export type JenisInstansi = 'KABUPATEN' | 'KOTA' | 'LEMBAGA';
+
+export const JENIS_INSTANSI_LABEL: Record<JenisInstansi, string> = {
+  KABUPATEN: 'Pemerintah Kabupaten',
+  KOTA: 'Pemerintah Kota',
+  LEMBAGA: 'Kampus / Lembaga Pelatihan (simulasi)',
+};
+
+export interface Pendaftaran {
+  uid: string;
+  email: string;
+  jenis: JenisInstansi;
+  namaInstansi: string; // "Kabupaten Sambas"
+  provinsi: string;
+  namaPj: string; // penanggung jawab
+  jabatan: string;
+  hp: string;
+  catatan?: string;
+  status: StatusPendaftaran;
+  tglDaftar: string;
+  pemdaId?: string;
+  alasan?: string;
+  diprosesOleh?: string;
+  tglProses?: string;
+}
+
 export interface Pemda {
   id: string;
   nama: string; // "Kabupaten Sambas"
   provinsi?: string;
   ibukota?: string;
   simulasi?: boolean;
+  jenis?: JenisInstansi;
 }
 
 export interface Kecamatan {

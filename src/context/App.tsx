@@ -26,6 +26,7 @@ interface AppState {
   authUser: AuthUser | null;
   authReady: boolean;
   profile: UserProfile | null;
+  profileLoading: boolean;
   pemda: Pemda | null;
   ta: number;
   setTa: (ta: number) => void;
@@ -74,7 +75,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => store.auth.onChange((u) => { setAuthUser(u); setAuthReady(true); }), []);
 
-  const { data: profile } = useDocu<UserProfile>(authUser ? P.user(authUser.uid) : null);
+  const { data: profile, loading: profileLoading } = useDocu<UserProfile>(authUser ? P.user(authUser.uid) : null);
   const pemdaId = profile?.pemdaId ?? null;
   const { data: pemda } = useDocu<Pemda>(pemdaId ? P.pemda(pemdaId) : null);
   const { data: desaList } = useCol<Desa>(pemdaId ? P.desaCol(pemdaId) : null);
@@ -124,7 +125,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const bisaSpp = useCallback((aksi: AksiSpp) => !!profile && AKSI_SPP[aksi].includes(profile.role), [profile]);
 
   const value: AppState = {
-    authUser, authReady, profile, pemda, ta, setTa, desaId, setDesaId, desa: desa ?? null, desaList: desaTersedia,
+    authUser, authReady, profile, profileLoading, pemda, ta, setTa, desaId, setDesaId, desa: desa ?? null, desaList: desaTersedia,
     kecamatan, konfig, akun, akunMap, kegiatanRef, kegiatanMap, sumberDana, ctx, sesi, isKab, readOnly, hak, bisaSpp,
   };
   return <C.Provider value={value}><AntApp>{children}</AntApp></C.Provider>;

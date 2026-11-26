@@ -21,6 +21,7 @@ React 18 + TypeScript (strict) + Vite 5 + Ant Design 5 + Firebase 11 (Auth, Fire
 - **Ledger model**: every cash/realisation event is a `ledger` doc (`jenis`, `kas` BANK/TUNAI/null, `masuk`, `keluar`, `realisasi`, `kdKeg`, `kdRek`, `sumberDana`, `pajak`). BKU, buku pembantu, LRA, jurnal all derive from ledger. Source docs store `_ledger: string[]` for deletion.
 - `src/lib/laporan/` — `generator.ts` builds a format-neutral `Laporan` model; `pdf.ts`, `excel.ts`, and the preview in `pages/laporan/Laporan.tsx` render it. Add a report = add to `DAFTAR_LAPORAN` + a `case` in `buatLaporan`.
 - `src/context/App.tsx` — session (profile, pemda, desa aktif, TA, konfigurasi, referensi), `hak(menu, aksi)` button permissions, `bisaSpp(aksi)` role checks, `useAksi()` error/success wrapper.
+- `src/lib/organisasi.ts` — organisation onboarding: self-registration (`pendaftaran/{uid}`, status MENUNGGU/DISETUJUI/DITOLAK), Super Admin approval (creates pemda + referensi + ADMIN_KAB profile), and direct creation. Tested in `organisasi.test.ts`. Logged-in users without a profile see `pages/StatusAkun.tsx`.
 - `src/components/CrudPage.tsx` — generic list+modal form used by most master/transaction pages.
 - `src/menu.ts` — menu tree (keys double as hak-menu keys).
 - `firestore.rules` — tenant isolation, read-only roles, month-lock via `penutupanKas`, immutable audit/posted jurnal.

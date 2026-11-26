@@ -44,6 +44,14 @@ Isi data contoh: **Tools › Backup & Data Simulasi › Isi contoh lengkap** (AP
 7. Hosting: `npm run build && firebase deploy --only hosting`.
    Alternatif **Firebase App Hosting** (deploy otomatis dari GitHub): buildpack menjalankan `npm run build` lalu `npm start` (`server.mjs`, menyajikan `dist/` di `$PORT`). Atur variabel `VITE_FIREBASE_*` di `apphosting.yaml` (availability `BUILD`); tanpa itu aplikasi berjalan dalam mode lokal.
 
+### Organisasi & akun
+
+- **Super Admin pertama** dibuat manual (langkah 5 di atas). Super Admin mengelola menu *File › Organisasi & Pendaftaran*.
+- **Daftar mandiri**: pemda/lembaga membuka halaman login › tab *Daftar Organisasi* → akun login dibuat dan data masuk ke `pendaftaran/{uid}` berstatus *Menunggu*. Super Admin **menyetujui** (membuat dokumen pemda + referensi + profil Admin Kabupaten) atau **menolak** dengan alasan (pendaftar bisa mengajukan ulang).
+- **Dibuatkan**: Super Admin › *Buatkan Organisasi* membuat pemda + akun Admin Kabupaten langsung (Cloud Function `buatUser`).
+- **Pengguna desa** tidak mendaftar sendiri: Admin Kabupaten membuatkan akun di *File › Pengaturan UserID*.
+- Mode lokal: akun demo `superadmin@demo.id / super123`.
+
 Emulator lokal: `firebase emulators:start` lalu set `VITE_USE_EMULATOR=true` di `.env`.
 
 ## Perintah

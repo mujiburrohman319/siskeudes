@@ -34,6 +34,20 @@ service cloud.firestore {
       allow create, delete: if isSuper();
     }
 
+    // Pendaftaran organisasi mandiri: pendaftar membuat/mengajukan ulang miliknya, Super Admin memproses.
+    match /pendaftaran/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isSuper());
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.status == 'MENUNGGU';
+      allow update: if isSuper()
+        || (signedIn() && request.auth.uid == uid && resource.data.status == 'DITOLAK'
+            && request.resource.data.status == 'MENUNGGU' && request.resource.data.uid == uid
+            && request.resource.data.email == request.auth.token.email);
+      allow delete: if isSuper();
+    }
+
     match /pemda/{p} {
       allow read: if inPemda(p) || isSuper();
       allow create: if isSuper();

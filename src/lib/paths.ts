@@ -8,6 +8,8 @@ export interface Ctx {
 export const P = {
   user: (uid: string) => `users/${uid}`,
   users: () => 'users',
+  pendaftaran: (uid: string) => `pendaftaran/${uid}`,
+  pendaftaranCol: () => 'pendaftaran',
   pemda: (p: string) => `pemda/${p}`,
   pemdaCol: () => 'pemda',
   kecamatan: (p: string) => `pemda/${p}/kecamatan`,

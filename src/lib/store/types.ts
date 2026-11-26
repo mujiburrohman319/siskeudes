@@ -16,6 +16,8 @@ export interface NewUserInput {
 export interface AuthAdapter {
   onChange(cb: (u: AuthUser | null) => void): () => void;
   signIn(email: string, password: string): Promise<void>;
+  /** Daftar akun login baru (tanpa profil) dan langsung masuk. Dipakai pendaftaran organisasi. */
+  signUp(email: string, password: string): Promise<AuthUser>;
   signOut(): Promise<void>;
   /** Membuat akun login + profil users/{uid}. Firebase: lewat Cloud Function (Admin SDK). */
   createUsers(items: NewUserInput[]): Promise<string[]>;

@@ -86,8 +86,8 @@ export function Layout({ children }: { children: ReactNode }) {
     key: g.key,
     icon: IKON_GRUP[g.key],
     label: g.label,
-    children: g.items.filter((i) => !i.kab || isKab).map((i) => ({ key: i.path, label: <Link to={i.path}>{i.label}</Link> })),
-  })).filter((g) => g.children.length), [isKab]);
+    children: g.items.filter((i) => (!i.kab || isKab) && (!i.superadmin || profile?.role === 'SUPERADMIN')).map((i) => ({ key: i.path, label: <Link to={i.path}>{i.label}</Link> })),
+  })).filter((g) => g.children.length), [isKab, profile?.role]);
 
   const tahunOpsi = Array.from({ length: 7 }, (_, i) => new Date().getFullYear() - 4 + i).map((t) => ({ value: t, label: `TA ${t}` }));
   const kecNama = (id: string) => kecamatan.find((k) => k.id === id)?.nama ?? '';
@@ -144,7 +144,7 @@ export function Layout({ children }: { children: ReactNode }) {
               items: [
                 { key: 'role', label: <div><b>{profile?.nama}</b><div style={{ fontSize: 12, color: '#7b8a83' }}>{profile ? ROLE_LABEL[profile.role] : ''}</div></div>, disabled: true },
                 { type: 'divider' },
-                { key: 'out', icon: <LogoutOutlined />, label: 'Keluar', danger: true, onClick: () => store.auth.signOut() },
+                { key: 'out', icon: <LogoutOutlined />, label: 'Keluar', danger: true, onClick: () => { nav('/'); void store.auth.signOut(); } },
               ],
             }}>
               <div className="sk-user">

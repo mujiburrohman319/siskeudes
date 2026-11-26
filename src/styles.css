@@ -189,3 +189,6 @@ body {
   .sk-header { padding: 0 12px !important; }
 }
 @media (max-width: 575px) { .sk-judul-grup { display: none; } }
+
+.sk-label-penuh .ant-form-item-label > label { width: 100%; }
+.sk-label-penuh .ant-form-item-label > label::after { display: none; }

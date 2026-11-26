@@ -6,7 +6,8 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 
 initializeApp();
-const db = getFirestore();
+// Database Firestore bernama: atur FIRESTORE_DB di functions/.env (default "(default)").
+const db = getFirestore(process.env.FIRESTORE_DB || '(default)');
 
 interface Item {
   email: string;

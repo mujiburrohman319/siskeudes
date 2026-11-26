@@ -27,6 +27,7 @@ Isi data contoh: **Tools › Backup & Data Simulasi › Isi contoh lengkap** (AP
 
 1. Buat proyek di Firebase Console. Aktifkan **Authentication (Email/Password)**, **Firestore** (region `asia-southeast2`), dan paket **Blaze** bila memakai Cloud Functions.
 2. Salin `.env.example` → `.env`, isi konfigurasi aplikasi web.
+   Bila database Firestore **bukan** `(default)` (mis. bernama `siskeudes`), isi `VITE_FIREBASE_DATABASE_ID`, `FIRESTORE_DB` di `functions/.env`, dan `"database"` di `firebase.json` dengan nama yang sama. Repo ini sudah diatur untuk database `siskeudes`.
 3. Salin `.firebaserc.example` → `.firebaserc`, isi project id.
 4. Deploy rules & functions:
    ```bash

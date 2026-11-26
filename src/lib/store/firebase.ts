@@ -23,9 +23,11 @@ export function createFirebaseStore(): DataStore {
     appId: env.VITE_FIREBASE_APP_ID,
   });
   // Persistensi offline: entri tetap bisa dilakukan saat sinyal lemah.
+  // Database bernama (mis. "siskeudes") bila bukan "(default)".
+  const databaseId = env.VITE_FIREBASE_DATABASE_ID?.trim() || '(default)';
   const db = initializeFirestore(app, {
     localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
-  });
+  }, databaseId);
   const fbAuth = getAuth(app);
   const fns = getFunctions(app, 'asia-southeast2');
   if (env.VITE_USE_EMULATOR === 'true') {

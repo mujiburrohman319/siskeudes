@@ -7,10 +7,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
+    function hasProfile() { return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
     function me() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
     function role() { return me().role; }
-    function isSuper() { return signedIn() && role() == 'SUPERADMIN'; }
-    function inPemda(p) { return signedIn() && me().pemdaId == p && me().aktif != false; }
+    function isSuper() { return hasProfile() && role() == 'SUPERADMIN'; }
+    function inPemda(p) { return hasProfile() && me().pemdaId == p && me().aktif != false; }
     function isAdminKab(p) { return isSuper() || (inPemda(p) && role() in ['ADMIN_KAB', 'DOSEN']); }
     function isKabReader(p) { return isSuper() || (inPemda(p) && role() in ['ADMIN_KAB', 'DOSEN', 'KECAMATAN', 'APIP']); }
     function desaRoles() { return ['OPERATOR_DESA', 'KADES', 'SEKDES', 'KAUR_KEU', 'PKA', 'MAHASISWA']; }
@@ -39,12 +40,12 @@ service cloud.firestore {
       allow read: if signedIn() && (request.auth.uid == uid || isSuper());
       allow create: if signedIn() && request.auth.uid == uid
         && request.resource.data.uid == uid
-        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.email == request.auth.token.email.lower()
         && request.resource.data.status == 'MENUNGGU';
       allow update: if isSuper()
         || (signedIn() && request.auth.uid == uid && resource.data.status == 'DITOLAK'
             && request.resource.data.status == 'MENUNGGU' && request.resource.data.uid == uid
-            && request.resource.data.email == request.auth.token.email);
+            && request.resource.data.email == request.auth.token.email.lower());
       allow delete: if isSuper();
     }
 

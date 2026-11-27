@@ -8,3 +8,5 @@ functions/node_modules
 .firebase
 *.tsbuildinfo
 !functions/.env
+# Screenshot/aset kerja AI Studio — jangan ikut dipublikasikan
+public/assets/aistudio/

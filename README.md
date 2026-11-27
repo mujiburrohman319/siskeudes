@@ -27,6 +27,7 @@ Isi data contoh: **Tools › Backup & Data Simulasi › Isi contoh lengkap** (AP
 
 1. Buat proyek di Firebase Console. Aktifkan **Authentication (Email/Password)**, **Firestore** (region `asia-southeast2`), dan paket **Blaze** bila memakai Cloud Functions.
 2. Salin `.env.example` → `.env`, isi konfigurasi aplikasi web.
+   Bila database Firestore **bukan** `(default)` (mis. bernama `siskeudes`), isi `VITE_FIREBASE_DATABASE_ID`, `FIRESTORE_DB` di `functions/.env`, dan `"database"` di `firebase.json` dengan nama yang sama. Repo ini sudah diatur untuk database `siskeudes`.
 3. Salin `.firebaserc.example` → `.firebaserc`, isi project id.
 4. Deploy rules & functions:
    ```bash
@@ -42,6 +43,15 @@ Isi data contoh: **Tools › Backup & Data Simulasi › Isi contoh lengkap** (AP
    Login → aplikasi menampilkan form **Penyiapan Pemda** (membuat dokumen pemda + referensi rekening/kegiatan/sumber dana).
 6. Lanjutkan di aplikasi: Parameter › Data Wilayah (kecamatan & desa) → File › Pengaturan UserID (Tambah User / Create All User).
 7. Hosting: `npm run build && firebase deploy --only hosting`.
+   Alternatif **Firebase App Hosting** (deploy otomatis dari GitHub): buildpack menjalankan `npm run build` lalu `npm start` (`server.mjs`, menyajikan `dist/` di `$PORT`). Atur variabel `VITE_FIREBASE_*` di `apphosting.yaml` (availability `BUILD`); tanpa itu aplikasi berjalan dalam mode lokal.
+
+### Organisasi & akun
+
+- **Super Admin pertama** dibuat manual (langkah 5 di atas). Super Admin mengelola menu *File › Organisasi & Pendaftaran*.
+- **Daftar mandiri**: pemda/lembaga membuka halaman login › tab *Daftar Organisasi* → akun login dibuat dan data masuk ke `pendaftaran/{uid}` berstatus *Menunggu*. Super Admin **menyetujui** (membuat dokumen pemda + referensi + profil Admin Kabupaten) atau **menolak** dengan alasan (pendaftar bisa mengajukan ulang).
+- **Dibuatkan**: Super Admin › *Buatkan Organisasi* membuat pemda + akun Admin Kabupaten langsung (Cloud Function `buatUser`).
+- **Pengguna desa** tidak mendaftar sendiri: Admin Kabupaten membuatkan akun di *File › Pengaturan UserID*.
+- Mode lokal: akun demo `superadmin@demo.id / super123`.
 
 Emulator lokal: `firebase emulators:start` lalu set `VITE_USE_EMULATOR=true` di `.env`.
 

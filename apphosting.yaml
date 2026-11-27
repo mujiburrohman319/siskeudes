@@ -1,0 +1,36 @@
+# Konfigurasi Firebase App Hosting.
+# Alur: buildpack menjalankan `npm ci` → `npm run build` → `npm start` (server.mjs, listen di $PORT).
+runConfig:
+  minInstances: 0
+  maxInstances: 2
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 512
+
+# Variabel VITE_* dibaca saat BUILD (dibakar ke bundle JS).
+# Tanpa variabel ini aplikasi berjalan dalam MODE LOKAL (data di browser).
+# Untuk memakai Firestore/Auth, hapus tanda komentar dan isi dari
+# Firebase Console > Project settings > Your apps (Web). Nilai config web Firebase tidak rahasia.
+env:
+  # Database Firestore proyek ini bernama "siskeudes" (bukan "(default)").
+  - variable: VITE_FIREBASE_DATABASE_ID
+    value: siskeudes
+    availability: [BUILD]
+#   - variable: VITE_FIREBASE_API_KEY
+#     value: ""
+#     availability: [BUILD]
+#   - variable: VITE_FIREBASE_AUTH_DOMAIN
+#     value: ""
+#     availability: [BUILD]
+#   - variable: VITE_FIREBASE_PROJECT_ID
+#     value: ""
+#     availability: [BUILD]
+#   - variable: VITE_FIREBASE_STORAGE_BUCKET
+#     value: ""
+#     availability: [BUILD]
+#   - variable: VITE_FIREBASE_MESSAGING_SENDER_ID
+#     value: ""
+#     availability: [BUILD]
+#   - variable: VITE_FIREBASE_APP_ID
+#     value: ""
+#     availability: [BUILD]

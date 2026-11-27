@@ -7,10 +7,14 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppProvider, useApp } from './context/App';
 import { Layout } from './Layout';
+import './styles.css';
+import { tema } from './theme';
 import { store } from './lib/store';
 import Beranda from './pages/Beranda';
 import DataUmum from './pages/DataUmum';
 import Login from './pages/Login';
+import StatusAkun from './pages/StatusAkun';
+import Organisasi from './pages/file/Organisasi';
 import Kegiatan from './pages/anggaran/Kegiatan';
 import Posting from './pages/anggaran/Posting';
 import Rak from './pages/anggaran/Rak';
@@ -39,15 +43,16 @@ import Spp from './pages/tu/Spp';
 dayjs.locale('id');
 
 function Shell() {
-  const { authReady, authUser, profile } = useApp();
+  const { authReady, authUser, profile, profileLoading } = useApp();
   if (!authReady) return <Spin fullscreen />;
   if (!authUser) return <Login />;
-  if (!profile) return <Spin fullscreen tip="Memuat profil…" />;
+  if (!profile) return profileLoading ? <Spin fullscreen tip="Memuat profil…" /> : <StatusAkun />;
   if (profile.aktif === false) return <Result status="403" title="Akun dinonaktifkan" extra={<a onClick={() => store.auth.signOut()}>Keluar</a>} />;
   return (
     <Layout>
       <Routes>
         <Route path="/" element={<Beranda />} />
+        <Route path="/file/organisasi" element={<Organisasi />} />
         <Route path="/file/user" element={<Users />} />
         <Route path="/file/hak-menu" element={<HakMenu />} />
         <Route path="/parameter/wilayah" element={<Wilayah />} />
@@ -81,7 +86,7 @@ function Shell() {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ConfigProvider locale={idID} theme={{ token: { colorPrimary: '#1f6f43', borderRadius: 6 } }}>
+    <ConfigProvider locale={idID} theme={tema}>
       <BrowserRouter>
         <AppProvider>
           <Shell />

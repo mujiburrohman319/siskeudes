@@ -119,6 +119,15 @@ export function createLocalStore(opts: LocalOptions = {}): DataStore {
       if (!rec || rec.password !== password) throw new Error('Email atau kata sandi salah.');
       setCurrent({ uid: rec.uid, email: email.toLowerCase() });
     },
+    async signUp(email, password) {
+      const e = email.toLowerCase();
+      if (data.has(`_auth/${e}`)) throw new Error(`Email ${e} sudah terdaftar.`);
+      if (password.length < 6) throw new Error('Kata sandi minimal 6 karakter.');
+      const u = { uid: `u_${Math.random().toString(36).slice(2, 12)}`, email: e };
+      applyOps([{ type: 'set', path: `_auth/${e}`, data: { uid: u.uid, password } }]);
+      setCurrent(u);
+      return u;
+    },
     async signOut() {
       setCurrent(null);
     },

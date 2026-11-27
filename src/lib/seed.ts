@@ -40,6 +40,7 @@ export async function seedDemo(store: DataStore, ta: number) {
     email, password, profile: { nama, role, grup: role, pemdaId: p, desaId, kecId, aktif: true },
   });
   await store.auth.createUsers([
+    u('superadmin@demo.id', 'super123', 'Super Admin Aplikasi', 'SUPERADMIN'),
     u('admin@demo.id', 'admin123', 'Admin DPMD Sambas', 'ADMIN_KAB'),
     u('kecamatan@demo.id', 'kec123', 'Operator Kec. Sambas', 'KECAMATAN', undefined, 'kec01'),
     u('operator@demo.id', 'desa123', 'Operator Desa Sungai Harapan', 'OPERATOR_DESA', 'desa01', 'kec01'),

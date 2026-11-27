@@ -7,10 +7,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
+    function hasProfile() { return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
     function me() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
     function role() { return me().role; }
-    function isSuper() { return signedIn() && role() == 'SUPERADMIN'; }
-    function inPemda(p) { return signedIn() && me().pemdaId == p && me().aktif != false; }
+    function isSuper() { return hasProfile() && role() == 'SUPERADMIN'; }
+    function inPemda(p) { return hasProfile() && me().pemdaId == p && me().aktif != false; }
     function isAdminKab(p) { return isSuper() || (inPemda(p) && role() in ['ADMIN_KAB', 'DOSEN']); }
     function isKabReader(p) { return isSuper() || (inPemda(p) && role() in ['ADMIN_KAB', 'DOSEN', 'KECAMATAN', 'APIP']); }
     function desaRoles() { return ['OPERATOR_DESA', 'KADES', 'SEKDES', 'KAUR_KEU', 'PKA', 'MAHASISWA']; }
@@ -28,10 +29,26 @@ service cloud.firestore {
 
     match /users/{uid} {
       allow read: if signedIn() && (request.auth.uid == uid || isKabReader(resource.data.pemdaId));
+      allow create: if isSuper()
+        || (isAdminKab(request.resource.data.pemdaId) && request.resource.data.role != 'SUPERADMIN');
       allow update: if isAdminKab(resource.data.pemdaId)
         && request.resource.data.pemdaId == resource.data.pemdaId
         && (request.resource.data.role != 'SUPERADMIN' || isSuper());
-      allow create, delete: if isSuper();
+      allow delete: if isSuper();
+    }
+
+    // Pendaftaran organisasi mandiri: pendaftar membuat/mengajukan ulang miliknya, Super Admin memproses.
+    match /pendaftaran/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isSuper());
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.email == request.auth.token.email.lower()
+        && request.resource.data.status == 'MENUNGGU';
+      allow update: if isSuper()
+        || (signedIn() && request.auth.uid == uid && resource.data.status == 'DITOLAK'
+            && request.resource.data.status == 'MENUNGGU' && request.resource.data.uid == uid
+            && request.resource.data.email == request.auth.token.email.lower());
+      allow delete: if isSuper();
     }
 
     match /pemda/{p} {

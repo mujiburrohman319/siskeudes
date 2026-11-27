@@ -6,7 +6,9 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 
 initializeApp();
-const db = getFirestore();
+// Database Firestore bernama: atur FIRESTORE_DB di functions/.env (repo ini memakai "siskeudes").
+const db = getFirestore(process.env.FIRESTORE_DB || 'siskeudes');
+db.settings({ ignoreUndefinedProperties: true });
 
 interface Item {
   email: string;
@@ -16,9 +18,14 @@ interface Item {
 
 const ROLE_ADMIN = ['SUPERADMIN', 'ADMIN_KAB', 'DOSEN'];
 
-export const buatUser = onCall({ region: 'asia-southeast2' }, async (req) => {
+export const buatUser = onCall({ region: 'asia-southeast2', cors: true }, async (req) => {
   if (!req.auth) throw new HttpsError('unauthenticated', 'Harus login.');
-  const caller = (await db.doc(`users/${req.auth.uid}`).get()).data();
+  let caller: FirebaseFirestore.DocumentData | undefined;
+  try {
+    caller = (await db.doc(`users/${req.auth.uid}`).get()).data();
+  } catch (e) {
+    throw new HttpsError('failed-precondition', `Gagal membaca profil dari Firestore (${process.env.FIRESTORE_DB || 'siskeudes'}): ${(e as Error).message}`);
+  }
   if (!caller || !ROLE_ADMIN.includes(caller.role)) throw new HttpsError('permission-denied', 'Hanya admin kabupaten yang dapat membuat user.');
   const items = (req.data?.items ?? []) as Item[];
   if (!Array.isArray(items) || !items.length || items.length > 500) throw new HttpsError('invalid-argument', 'Jumlah user 1–500 per permintaan.');

@@ -5,6 +5,7 @@ export interface MenuItemDef {
   label: string;
   kab?: boolean; // hanya peran kabupaten
   desa?: boolean; // perlu desa aktif
+  superadmin?: boolean; // hanya Super Admin
 }
 
 export interface MenuGroup {
@@ -16,6 +17,7 @@ export interface MenuGroup {
 export const MENU: MenuGroup[] = [
   {
     key: 'file', label: 'File', items: [
+      { key: 'organisasi', path: '/file/organisasi', label: 'Organisasi & Pendaftaran', kab: true, superadmin: true },
       { key: 'user', path: '/file/user', label: 'Pengaturan UserID', kab: true },
       { key: 'hakmenu', path: '/file/hak-menu', label: 'Pengaturan Menu', kab: true },
     ],

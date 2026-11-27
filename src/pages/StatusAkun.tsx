@@ -87,7 +87,7 @@ export default function StatusAkun() {
           <span className="sk-brand-logo">SK</span>
           <span style={{ fontWeight: 750, fontSize: 17 }}>SISKEUDES<span style={{ color: '#6ee7b7' }}>·</span>Web</span>
         </div>
-        <Card>{isiKartu}</Card>
+        <Card className="sk-status-kartu">{isiKartu}</Card>
       </div>
     </div>
   );

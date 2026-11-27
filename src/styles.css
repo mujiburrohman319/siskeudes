@@ -192,3 +192,76 @@ body {
 
 .sk-label-penuh .ant-form-item-label > label { width: 100%; }
 .sk-label-penuh .ant-form-item-label > label::after { display: none; }
+
+/* ================= Animasi ringan =================
+   Semua animasi singkat (≤ 600 ms) dan dimatikan bila pengguna memilih "kurangi gerakan". */
+@keyframes sk-naik { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes sk-pudar { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sk-geser-kanan { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+@keyframes sk-gradien { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+@keyframes sk-denyut { 0%, 100% { box-shadow: 0 4px 12px rgba(5, 150, 105, 0.45); } 50% { box-shadow: 0 4px 20px rgba(52, 211, 153, 0.7); } }
+@keyframes sk-mengambang { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+/* Konten halaman: setiap blok muncul berurutan saat pindah menu */
+.sk-masuk > * { animation: sk-naik 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.sk-masuk > *:nth-child(2) { animation-delay: 0.05s; }
+.sk-masuk > *:nth-child(3) { animation-delay: 0.1s; }
+.sk-masuk > *:nth-child(4) { animation-delay: 0.15s; }
+.sk-masuk > *:nth-child(n+5) { animation-delay: 0.2s; }
+
+/* Kartu KPI beranda: muncul berurutan + terangkat saat disorot */
+.sk-kpi-kol { animation: sk-naik 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.sk-kpi-kol:nth-child(2) { animation-delay: 0.06s; }
+.sk-kpi-kol:nth-child(3) { animation-delay: 0.12s; }
+.sk-kpi-kol:nth-child(4) { animation-delay: 0.18s; }
+.sk-kpi { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.sk-kpi:hover { transform: translateY(-3px); box-shadow: 0 12px 28px -12px rgba(16, 24, 20, 0.22); }
+.sk-kpi-ikon { transition: transform 0.25s ease; }
+.sk-kpi:hover .sk-kpi-ikon { transform: scale(1.08) rotate(-4deg); }
+.sk-alur-item { transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease; }
+.sk-alur-item:hover { transform: translateY(-2px); border-color: #b7e4cc; background: #f0faf5; }
+
+/* Banner beranda: gradien bergerak perlahan */
+.sk-hero { background-size: 200% 200%; animation: sk-gradien 14s ease infinite; }
+
+/* Logo berdenyut halus */
+.sk-brand-logo { animation: sk-denyut 3.2s ease-in-out infinite; }
+
+/* Tombol & baris tabel */
+.ant-btn { transition: transform 0.12s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
+.ant-btn:not(:disabled):active { transform: scale(0.97); }
+.ant-table-wrapper .ant-table-tbody > tr > td { transition: background 0.2s ease; }
+.sk-sider .ant-menu-item, .sk-sider .ant-menu-submenu-title { transition: background 0.2s ease, color 0.2s ease, padding 0.2s ease !important; }
+.sk-sider .ant-menu-title-content { display: inline-block; transition: transform 0.2s ease; }
+.sk-sider .ant-menu-item:not(.ant-menu-item-selected):hover .ant-menu-title-content { transform: translateX(3px); }
+
+/* Login: panel kiri & form muncul bertahap, kartu fitur mengambang */
+.sk-login-kiri h1, .sk-login-kiri p { animation: sk-naik 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.sk-login-kiri p { animation-delay: 0.1s; }
+.sk-fitur-item { animation: sk-naik 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease; }
+.sk-fitur-item:nth-child(1) { animation-delay: 0.2s; }
+.sk-fitur-item:nth-child(2) { animation-delay: 0.28s; }
+.sk-fitur-item:nth-child(3) { animation-delay: 0.36s; }
+.sk-fitur-item:nth-child(4) { animation-delay: 0.44s; }
+.sk-fitur-item:hover { transform: translateY(-3px); background: rgba(255, 255, 255, 0.1); border-color: rgba(110, 231, 183, 0.35); }
+.sk-login-form { animation: sk-geser-kanan 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.sk-login-form .ant-form { animation: sk-pudar 0.35s ease both; }
+.sk-demo-item { animation: sk-naik 0.4s ease both; }
+.sk-demo-item:nth-child(2) { animation-delay: 0.04s; }
+.sk-demo-item:nth-child(3) { animation-delay: 0.08s; }
+.sk-demo-item:nth-child(4) { animation-delay: 0.12s; }
+.sk-demo-item:nth-child(n+5) { animation-delay: 0.16s; }
+.sk-login-kiri::after {
+  content: ''; position: absolute; right: -120px; top: 18%;
+  width: 320px; height: 320px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.22), transparent 70%);
+  animation: sk-mengambang 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Layar status akun */
+.sk-status-kartu { animation: sk-naik 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}

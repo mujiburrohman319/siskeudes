@@ -3,7 +3,7 @@ import {
   FileTextOutlined, LockOutlined, PlusOutlined, RiseOutlined, ShoppingCartOutlined,
 } from '@ant-design/icons';
 import { Alert, Button, Card, Col, Descriptions, Form, Input, Progress, Row, Space, Table, Tag, Typography } from 'antd';
-import { useMemo, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useAksi, useApp } from '../context/App';
 import { P } from '../lib/paths';
@@ -13,6 +13,29 @@ import { BULAN, rp, sum } from '../lib/format';
 import { saldoKas, saldoPajak, saldoPanjar, statusKegiatanWajib } from '../lib/keuangan';
 import { useAnggaran, useSaldoAwal, useTa } from '../lib/useTa';
 import type { Ledger, PenutupanKas, RincianAnggaran, Spp } from '../lib/types';
+
+/** Angka rupiah yang 'menghitung naik' saat nilainya muncul/berubah (≈0,8 detik). */
+function AngkaNaik({ nilai }: { nilai: number }) {
+  const [tampil, setTampil] = useState(0);
+  const dari = useRef(0);
+  useEffect(() => {
+    const kurangiGerak = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (kurangiGerak) { setTampil(nilai); dari.current = nilai; return; }
+    const awal = dari.current;
+    const mulai = performance.now();
+    let id = 0;
+    const langkah = (t: number) => {
+      const p = Math.min(1, (t - mulai) / 800);
+      const v = Math.round(awal + (nilai - awal) * (1 - Math.pow(1 - p, 3)));
+      setTampil(v);
+      if (p < 1) id = requestAnimationFrame(langkah);
+      else dari.current = nilai;
+    };
+    id = requestAnimationFrame(langkah);
+    return () => { cancelAnimationFrame(id); dari.current = nilai; };
+  }, [nilai]);
+  return <>{rp(tampil)}</>;
+}
 
 function BerandaDesa() {
   const { desa, konfig, ta, kegiatanMap, profile } = useApp();
@@ -80,12 +103,12 @@ function BerandaDesa() {
 
       <Row gutter={[20, 20]}>
         {kpi.map((k) => (
-          <Col key={k.label} xs={24} sm={12} xl={6}>
+          <Col key={k.label} xs={24} sm={12} xl={6} className="sk-kpi-kol">
             <Card className="sk-kpi">
               <div className="sk-kpi-atas">
                 <div>
                   <div className="sk-kpi-label">{k.label}</div>
-                  <div className="sk-kpi-nilai"><small>Rp</small>{rp(k.nilai)}</div>
+                  <div className="sk-kpi-nilai"><small>Rp</small><AngkaNaik nilai={k.nilai} /></div>
                 </div>
                 <span className="sk-kpi-ikon" style={{ color: k.warna, background: k.latar }}>{k.ikon}</span>
               </div>

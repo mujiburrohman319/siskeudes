@@ -166,7 +166,7 @@ export function Layout({ children }: { children: ReactNode }) {
           ) : aktif?.kab && !isKab ? (
             <Alert type="warning" showIcon message="Menu ini khusus pengguna kabupaten." />
           ) : (
-            <div className="sk-tumpuk">{children}</div>
+            <div className="sk-tumpuk sk-masuk" key={loc.pathname}>{children}</div>
           )}
         </Content>
       </AL>

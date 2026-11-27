@@ -476,10 +476,11 @@ export default function Wilayah() {
             <Col xs={24} sm={11}>
               <Form.Item
                 name="kode"
-                label={<span>Kode Desa Kemendagri {!manualDesa && <Tag color="green" style={{ marginLeft: 4 }}>Otomatis</Tag>}</span>}
+                label="Kode Desa (Kemendagri)"
                 rules={[{ required: true, message: 'Kode desa wajib diisi' }]}
               >
-                <Input placeholder="61.01.01.2001" readOnly={!manualDesa} />
+                <Input placeholder="61.01.01.2001" readOnly={!manualDesa}
+                  suffix={!manualDesa && <Tag color="green" style={{ margin: 0, fontSize: 11, lineHeight: '18px' }}>Otomatis</Tag>} />
               </Form.Item>
             </Col>
             <Col xs={24} sm={13}>
